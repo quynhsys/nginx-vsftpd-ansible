@@ -1,0 +1,9 @@
+users:
+  - name: hoanpv
+    servers:
+      - 192.168.99.100
+      - 192.168.99.200
+    groups: sudo
+    authorized_keys:
+      - hoanpv.pub
+

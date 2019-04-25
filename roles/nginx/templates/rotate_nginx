@@ -1,0 +1,14 @@
+/home/*/logs/access.log /home/*/logs/error.log /home/*/logs/nginx_error.log {
+        create 640 nginx nginx
+        daily
+	missingok
+        rotate 5
+        maxage 7
+        compress
+        delaycompress
+        notifempty
+        sharedscripts
+        postrotate
+                [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+        endscript
+}

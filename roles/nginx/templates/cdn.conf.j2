@@ -1,0 +1,48 @@
+#
+# The default server
+#
+
+server {
+    listen       80 default_server;
+    listen       [::]:80 default_server;
+    server_name  _;
+   # root         /home/root_dir/public;
+    root         /etc/nginx/sites-available;
+    access_log /var/log/nginx/cdn.access.log custom;
+    error_log /var/log/nginx/cdn.error.log;
+
+    # Load configuration files for the default server block.
+    include /etc/nginx/default.d/*.conf;
+    add_header Cache-Control "max-age=31536000,public, s-maxage=3600, max-age=3600";
+    location / {
+    }
+
+    error_page 404 /404.html;
+        location = /40x.html {
+    }
+
+    error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+    }
+# cache.appcache, your document html and data
+        location ~* \.(?:manifest|appcache|html?|xml|json|txt)$ {
+        expires 4d;
+        add_header Cache-Control "public, s-maxage=3600, max-age=3600";
+}
+# Media: images, icons, video, audio, HTC, word
+        location ~* \.(?:jpg|jpeg|gif|png|bmp|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|pict,csv,doc,pdf,pls,ppt,tif,tiff,eps,ejs,swf,midi,mid,ttf,eot,woff,otf,svg,svgz,webp,docx,xlsx,xls,pptx,ps,class,jar)$ {
+        expires 30d;
+        add_header Cache-Control "public, s-maxage=3600, max-age=3600";
+}
+# CSS and Javascript
+        location ~* \.(?:css|js)$ {
+        expires 1d;
+        add_header Cache-Control "public, s-maxage=3600, max-age=3600";
+}
+# Feed
+        location ~* \.(?:rss|atom)$ {
+        expires 4d;
+        add_header Cache-Control "public, s-maxage=3600, max-age=3600";
+}
+
+}

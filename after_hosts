@@ -1,0 +1,13 @@
+# Example host to install nginx
+[example-zone]
+192.168.99.10 roles=loadbalancer ansible_ssh_port=1102
+192.168.99.20 roles=loadbalancer ansible_ssh_port=1102
+
+192.168.99.100 roles=backend ansible_ssh_port=1102
+192.168.99.200 roles=backend ansible_ssh_port=22
+
+[example-zone:vars]
+range_ip_lan=192.168.10.0/24
+
+[user]
+34.83.10.249 ansible_ssh_port=22

@@ -1,0 +1,176 @@
+---
+
+- name: Disable selinux temporary
+  command: setenforce 0
+  when: ansible_os_family == 'RedHat'
+  ignore_errors: True
+  tags:
+    - nginx_install
+
+- name: Disable selinux after reboot
+  selinux:
+    state: disabled
+  when: ansible_os_family == 'RedHat'
+  tags:
+    - nginx_install
+
+- name: Install Epel Repo
+  yum: name={{ item }} state=present
+  with_items:
+    - epel-release
+  when: ansible_distribution == "CentOS"
+  tags:
+    - nginx_install
+
+- name: install required yum packages
+  yum: name={{ item }} state=present
+  with_items:
+    - wget
+    - gcc
+    - gcc-c++
+    - make
+    - perl
+    - perl-devel
+    - perl-ExtUtils-Embed
+    - GeoIP
+    - GeoIP-devel
+    - pcre
+    - pcre-devel
+    - zlib
+    - zlib-devel
+    - openssl
+    - openssl-devel
+    - git
+    - net-tools
+    - vim
+    - bind-utils
+    - wget
+  when: ansible_distribution == "CentOS"
+  tags:
+    - nginx_install
+
+- name: Check nginx old version if exist
+  command: "{{ nginx_binary_file }} -v"
+  register: result
+  ignore_errors: True
+  # tags:
+  # - nginx_install
+
+- name: Download nginx source file
+  command: "{{ item }} chdir={{ nginx_src_dir }}"
+  with_items: 
+    - wget http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz 
+   # dest={{ nginx_src_dir }}/nginx-{{ nginx_version }}.tar.gz
+ # when: (result is failed) or ('{{ nginx_version }}' not in result.stderr)
+  tags:
+    - nginx_install
+
+- name: Decompress nginx source file
+  unarchive: 
+    src={{ nginx_src_dir }}/nginx-{{ nginx_version }}.tar.gz 
+    dest={{ nginx_src_dir }} 
+    creates={{ nginx_src_dir }}/nginx-{{ nginx_version }} 
+    copy=no
+  tags:
+   - nginx_install
+
+- name: Build nginx from source
+  command: "{{ item}} chdir={{ nginx_src_dir }}/nginx-{{ nginx_version }}"
+  with_items: 
+   - './configure {{ nginx_custom_modules }}'
+   - make
+   - make install
+  when: ansible_distribution == "CentOS"
+#  tags:
+ #   - nginx_install
+
+- name: Create systemd service file for CentOS 7
+  template: 
+    src=nginx.service.j2
+    dest=/lib/systemd/system/nginx.service
+    mode=0755
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+ # tags:
+ #  - nginx_install
+
+- name: Create init file for CentOS 6
+  template:
+    src=nginx.init.j2
+    dest=/etc/init.d/nginx
+    mode=0755
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+ # tags:
+ #   - nginx_install
+- name: Create init file for CentOS 6
+  template:
+    src=nginx.conf.j2
+    dest=/etc/nginx/conf/nginx.conf
+    mode=0755
+ # when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+  tags:
+   - nginx_install
+
+- name: create mkdir conf.d,sites-available
+  file:
+    path: "/etc/nginx/{{item}}"
+    owner: root
+    group: root
+    mode: 0755
+    recurse: yes
+    state: directory
+  with_items: ["sites-available", "sites-enabled", "conf.d"]
+  tags:
+   - nginx_install
+
+- name: File cdn.conf
+  template:
+    src: cdn.conf.j2
+    dest: /etc/nginx/sites-available/cdn.conf
+    owner: "root"
+    group: "root"
+    mode: 0644
+  tags:
+   - nginx_install
+
+- name: Nginx | Create Group
+  group:
+    name: "{{ nginx_group }}"
+    state: present
+  tags:
+    - nginx_install
+
+- name: Nginx | Create User
+  user:
+    name: "{{ nginx_user }}"
+    group: "{{ nginx_group }}"
+    shell: /sbin/nologin
+    state: present
+  tags:
+    - nginx_install
+
+- name: add index.html
+  shell: echo INDEX WORKED!!! >> /etc/nginx/sites-available/index.html 
+  notify: start nginx
+  tags:
+   - nginx_install
+
+- name: Remove default config nginx
+  shell: "rm -rf {{ nginx_install_dir }}/conf/*.default"
+ # tags:
+  #    - nginx_install
+
+- name: Create nginx bin symlink
+  file:
+    src: "{{ nginx_binary_file }}"
+    dest: /usr/bin/nginx
+    state: link
+  tags:
+    - nginx_install
+
+- name: Config logrotate nginx
+  template:
+    src=nginx_logrotate.j2
+    dest=/etc/logrotate.d/nginx
+    mode=0644
+ # tags:
+  #  - nginx_install

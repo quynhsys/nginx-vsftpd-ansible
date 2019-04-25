@@ -1,0 +1,8 @@
+users:
+  - name: quynh
+    servers:
+      - 34.83.10.249 
+    groups: sudo
+    authorized_keys:
+      - quynh.pub
+

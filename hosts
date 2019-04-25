@@ -1,0 +1,7 @@
+[web-server]
+192.168.99.100 ansible_ssh_user=root ansible_ssh_pass=zaq1Xsw@
+192.168.99.200 ansible_ssh_user=root ansible_ssh_pass=zaq1Xsw@
+
+[user]
+
+34.83.10.249 ansible_ssh_port=22

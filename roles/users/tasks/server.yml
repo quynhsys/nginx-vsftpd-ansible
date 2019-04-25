@@ -1,0 +1,81 @@
+---
+
+- name: Disable selinux temporary
+  command: setenforce 0
+  when: ansible_os_family == 'RedHat'
+  ignore_errors: True
+  tags:
+    - servers
+
+- name: Disable selinux after reboot
+  selinux:
+    state: disabled
+  when: ansible_os_family == 'RedHat'
+  tags:  
+    - servers
+
+- name: Install sudo on Centos
+  yum:
+    name: sudo
+    state: latest
+  when: ansible_os_family == 'RedHat'
+  tags:
+    - servers
+
+- name: Install sudo on Ubuntu
+  apt:
+    name: sudo
+    state: latest
+  when: ansible_os_family == 'Debian'
+  tags:
+    - servers
+
+- name: Create sudo group
+  group: name=sudo state=present
+  tags:
+    - servers
+
+- name: Allow sudo to execute in non TTY environments
+  lineinfile: >
+    dest=/etc/sudoers
+    regexp="^Defaults    requiretty$"
+    line="#Defaults    requiretty"
+  tags:
+    - servers
+
+- name: Allow users to use sudo without a password
+  lineinfile: >
+    dest=/etc/sudoers
+    regexp='%sudo '
+    line='%sudo ALL=(ALL) NOPASSWD: ALL'
+    state=present
+    validate='visudo -cf %s'
+  tags:
+    - servers
+
+- name: Change color root user
+  lineinfile: >
+    dest=/root/.bashrc
+    line='force_color_prompt=yes'
+    line='PS1="\[\e[01;31m\]$PS1\[\e[00m\]"'
+    state=present
+  become: yes
+#  tags:
+ #   - servers
+
+- name: Adjust timezone to Asia/Ho_Chi_Minh
+  file:
+    src: /usr/share/zoneinfo/Asia/Ho_Chi_Minh
+    dest: /etc/localtime
+    state: link
+  tags:
+    - servers
+
+- name: change port ssh
+  command: "{{ item }}"
+  with_items:
+   - sed -i --follow-symlinks 's/Port 22/Port 8622/g' /etc/ssh/sshd_config
+   - sed -i --follow-symlinks 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+  notify: restart sshd
+  tags:
+   - servers

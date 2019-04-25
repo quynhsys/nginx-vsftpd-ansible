@@ -1,0 +1,69 @@
+---
+
+- name: install vsftpd
+  yum: name={{ item }} state=present
+  with_items:
+   - epel-release
+   - vsftpd
+  tags:
+   - users
+
+- name: Remove vsftpd default
+  lineinfile: >
+    dest=/etc/vsftpd/vsftpd.conf
+    state=absent
+    regexp='^.*?{{ item }}'
+  with_items:
+   - anonymous_enable
+   - local_enable
+   - write_enable
+   - local_umask
+   - dirmessage_enable
+   - xferlog_enable
+   - connect_from_port_20
+   - xferlog_std_format
+   - ascii_upload_enable
+   - ascii_download_enable
+   - ftpd_banner
+   - listen
+   - listen_ipv6
+   - pam_service_name
+   - userlist_enable
+   - tcp_wrappers
+   - use_localtime
+  tags:
+    - users
+
+- name: config vsftpd
+  lineinfile: >
+    dest=/etc/vsftpd/vsftpd.conf
+    state=present
+    line='{{ item }}'
+  with_items:
+   - "anonymous_enable=NO"
+   - "local_enable=YES"
+   - "write_enable=YES"
+   - "local_umask=022"
+   - "dirmessage_enable=YES"
+   - "xferlog_enable=YES"
+   - "connect_from_port_20=YES"
+   - "xferlog_std_format=YES"
+   - "ascii_upload_enable=YES"
+   - "ascii_download_enable=YES"
+   - "ftpd_banner=Welcome to blah FTP service."
+   - "listen=NO"
+   - "listen_ipv6=YES"
+   - "pam_service_name=vsftpd"
+   - "userlist_enable=YES"
+   - "tcp_wrappers=YES"
+   - "use_localtime=YES"
+  tags:
+   - users
+
+- name: Start vsftpd
+  service:
+    enabled: True
+    name: 'vsftpd'
+    state: started
+  tags:
+   - users
