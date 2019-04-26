@@ -81,8 +81,8 @@
    - make
    - make install
   when: ansible_distribution == "CentOS"
-#  tags:
- #   - nginx_install
+  tags:
+    - nginx_install
 
 - name: Create systemd service file for CentOS 7
   template: 
@@ -91,22 +91,36 @@
     mode=0755
   when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
  # tags:
- #  - nginx_install
+  # - nginx_install
+
+- name: touch nginx
+  command: touch /etc/init.d/nginx
+  tags:
+   - nginx_install
 
 - name: Create init file for CentOS 6
   template:
     src=nginx.init.j2
-    dest=/etc/init.d/nginx
+    dest=/etc/init.d/nginx/nginx.init
     mode=0755
-  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
- # tags:
- #   - nginx_install
+ # when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+  tags:
+    - nginx_install
+
 - name: Create init file for CentOS 6
   template:
     src=nginx.conf.j2
     dest=/etc/nginx/conf/nginx.conf
     mode=0755
  # when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+#  tags:
+#   - nginx_install
+
+- name: Create init file for CentOS 6
+  template:
+    src=rotate_nginx.j2
+    dest=/etc/logrotate.d/nginx/rotate_nginx
+    mode=0755
   tags:
    - nginx_install
 
@@ -129,8 +143,8 @@
     owner: "root"
     group: "root"
     mode: 0644
-  tags:
-   - nginx_install
+ # tags:
+  # - nginx_install
 
 - name: Nginx | Create Group
   group:
@@ -145,14 +159,15 @@
     group: "{{ nginx_group }}"
     shell: /sbin/nologin
     state: present
+ # notify: start nginx
   tags:
     - nginx_install
 
 - name: add index.html
   shell: echo INDEX WORKED!!! >> /etc/nginx/sites-available/index.html 
   notify: start nginx
-  tags:
-   - nginx_install
+ # tags:
+  # - nginx_install
 
 - name: Remove default config nginx
   shell: "rm -rf {{ nginx_install_dir }}/conf/*.default"
@@ -164,8 +179,8 @@
     src: "{{ nginx_binary_file }}"
     dest: /usr/bin/nginx
     state: link
-  tags:
-    - nginx_install
+ # tags:
+  #  - nginx_install
 
 - name: Config logrotate nginx
   template:

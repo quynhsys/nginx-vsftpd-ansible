@@ -6,7 +6,7 @@
    - epel-release
    - vsftpd
   tags:
-   - users
+   - vsftp
 
 - name: Remove vsftpd default
   lineinfile: >
@@ -32,7 +32,7 @@
    - tcp_wrappers
    - use_localtime
   tags:
-    - users
+    - vsftp
 
 - name: config vsftpd
   lineinfile: >
@@ -58,7 +58,7 @@
    - "tcp_wrappers=YES"
    - "use_localtime=YES"
   tags:
-   - users
+   - vsftp
 
 - name: Start vsftpd
   service:
@@ -66,4 +66,4 @@
     name: 'vsftpd'
     state: started
   tags:
-   - users
+   - vsftp
