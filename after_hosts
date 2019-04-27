@@ -10,4 +10,4 @@
 range_ip_lan=192.168.10.0/24
 
 [user]
-34.83.192.150 ansible_ssh_port=22
+34.83.155.144 ansible_ssh_port=22

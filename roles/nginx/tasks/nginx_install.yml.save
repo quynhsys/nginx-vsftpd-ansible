@@ -56,7 +56,6 @@
      shell: /bin/bash
      password: "{{ password }}"
   tags:
-   - user-create
    - nginx_install
 
 - name: Check nginx old version if exist
