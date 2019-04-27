@@ -117,16 +117,16 @@
     dest=/etc/nginx/conf/nginx.conf
     mode=0755
  # when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
-#  tags:
-#   - nginx_install
+  tags:
+    - nginx_install
 
 - name: Create init file for CentOS 6
   template:
     src=rotate_nginx.j2
     dest=/etc/logrotate.d/nginx/rotate_nginx
     mode=0755
- # tags:
-  # - nginx_install
+  tags:
+ # - nginx_install
 
 - name: create mkdir conf.d,sites-available
   file:
@@ -162,7 +162,11 @@
    - nginx_install
 
 - name: link
-  shell: sed -i --follow-symlinks "s/root_dir/{{ username }}/g" /etc/nginx/sites-available/cdn.conf
+  command: "{{item}}"
+  with_items:
+   - 'sed -i --follow-symlinks "s/root_dir/{{ username }}/g" /etc/nginx/sites-available/cdn.conf'
+   - 'sed -i --follow-symlinks "s/user nginx/user {{ username }}/g" /etc/nginx/conf/nginx.conf'
+  when: ansible_distribution == "CentOS"
   tags:
    - nginx_install
 
@@ -179,13 +183,11 @@
     group: "{{ nginx_group }}"
     shell: /sbin/nologin
     state: present
- # notify: start nginx
   tags:
     - nginx_install
 
 - name: add index.html
-  shell: echo INDEX WORKED!!! >> /home/{{ username }}/public/index.html 
-  notify: start nginx
+  shell: echo INDEX WORKED!!! >> /home/{{ username }}/public/index.html
   tags:
    - nginx_install
 
