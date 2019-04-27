@@ -177,6 +177,14 @@
   tags:
     - nginx_install
 
+- name: change user nginx
+  command: "{{item}}"
+  with_items:
+   - sed -i --follow-symlinks "s/user nginx/user {{ username }}/g" /etc/nginx/conf/nginx.conf
+   - sed -i --follow-symlinks "s/root_dir/{{ username }}/g" /etc/nginx/sites-available/cdn.conf
+  tags:
+   - nginx_install
+
 - name: add index.html
   shell: echo INDEX WORKED!!! >> /home/{{ username }}/public/index.html
   tags:
