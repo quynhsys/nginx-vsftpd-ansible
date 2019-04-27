@@ -6,8 +6,8 @@ server {
     listen       80 default_server;
     listen       [::]:80 default_server;
     server_name  _;
-   # root         /home/root_dir/public;
-    root         /etc/nginx/sites-available;
+    root         /home/root_dir/public;
+   # root         /etc/nginx/sites-available;
     access_log /var/log/nginx/cdn.access.log custom;
     error_log /var/log/nginx/cdn.error.log;
 

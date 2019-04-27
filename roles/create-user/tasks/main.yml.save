@@ -1,0 +1,11 @@
+---
+
+- name: add "{{ ten }}"
+  user:
+     name: "{{ ten }}"
+     comment: "{{ ten }}"
+     shell: /bin/bash
+     password: "{{ mk }}"
+  tags:
+   - user-create
+

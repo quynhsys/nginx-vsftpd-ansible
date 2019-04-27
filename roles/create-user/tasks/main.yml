@@ -1,0 +1,24 @@
+---
+
+- name: add "{{ username }}"
+  user:
+     name: "{{ username}}"
+     comment: "{{ username }}"
+     shell: /bin/bash
+     password: "{{ password }}"
+  tags:
+   - user-create
+
+- name: add public
+  file:
+    path: "/home/{{ ten }}/{{item}}"
+    owner: "{{ ten }}"
+    owner: root
+    group: "{{ ten }}"
+    group: root
+    mode: 0755
+    recurse: yes
+    state: directory
+  with_items: ["public"]
+  tags:
+   - user-create
