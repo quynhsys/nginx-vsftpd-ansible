@@ -60,10 +60,10 @@
    - nginx_install
 
 - name: Check nginx old version if exist
-  command: "{{ nginx_binary_file }} -v"
+  command: /usr/sbin/bin -v
   register: result
   ignore_errors: True
-  # tags:
+ # tags:
   # - nginx_install
 
 - name: Download nginx source file
@@ -111,7 +111,7 @@
   tags:
     - nginx_install
 
-- name: Create init file for CentOS 6
+- name: Create config.conf file for CentOS
   template:
     src=nginx.conf.j2
     dest=/etc/nginx/conf/nginx.conf
@@ -120,7 +120,7 @@
   tags:
     - nginx_install
 
-- name: Create init file for CentOS 6
+- name: Create rotate_nginx file for CentOS 6
   template:
     src=rotate_nginx.j2
     dest=/etc/logrotate.d/nginx/rotate_nginx
@@ -128,7 +128,7 @@
  # tags:
  # - nginx_install
 
-- name: create mkdir conf.d,sites-available
+- name: create folder conf.d,sites-available
   file:
     path: "/etc/nginx/{{item}}"
     owner: root
@@ -187,6 +187,7 @@
 
 - name: add index.html
   shell: echo INDEX WORKED!!! >> /home/{{ username }}/public/index.html
+  notify: start nginx  
   tags:
     - nginx_install
 
@@ -195,22 +196,3 @@
  # tags:
   #    - nginx_install
 
-- name: Config logrotate nginx
-  template:
-    src=nginx_logrotate.j2
-    dest=/etc/logrotate.d/nginx
-    mode=0644
- # tags:
-  #  - nginx_install
-
-- name: set quyen
-  file:
-   path: /home/{{ username }}
-   owner: "{{ username }}"
-   group: "{{ username }}"
-   mode: 0755
-   recurse: yes
-   state: directory
-  notify: start nginx
- #tags:
-  # - nginx_install
